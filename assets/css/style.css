@@ -1,0 +1,9 @@
+header {
+    display: flex;
+    justify-content: space-between;
+}
+ul {
+    display: inline-flex;
+    flex-direction: row;
+    list-style: none;
+}
