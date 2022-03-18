@@ -1,4 +1,4 @@
-//defining globabl variables based on original html elements that will generate events or be manipulated by an event
+//defining globabl variables based on HTML elements
 var scores = document.querySelector(".scores");
 var timerEl = document.querySelector(".timer-value");
 var startButton = document.querySelector(".start");
@@ -7,34 +7,45 @@ var content = document.querySelector(".container");
 var questionContent = document.querySelector(".question-area");
 var answerList = document.querySelector(".answers");
 var result = document.querySelector(".result");
+//time variables
 var timer;
 var timerCount;
 var lessTime = 10
+// variable for quiz array index
 var quizIndex = 0;
-// variable for state of current score, if a wrong answer is selected 25pts are taken off
-var currentScore = 100;
+// variable for state of current score, if a right answer is selected 25pts are added
+var currentScore = 0;
 //declares variable for quiz q&a content as array containing an object for each question and answer set
 var quiz = [ 
   {
-    question: "This is the first question",
-    answers: ["answer1", "answer2", "answer3", "answer4"], 
-    rightAns: "answer2"
+    question: "Using _______ statement is how you test for a specific condition.",
+    answers: ["Switch", "If", "Select", "Loop"], 
+    rightAns: "If"
   },
   {
-    question: "This is the second question",
-    answers: ["answer1", "answer2", "answer3", "answer4"],
-    rightAns: "answer4"
+    question: "Which of these is a primitive data type?",
+    answers: ["Booleam", "String", "Number", "All of these"],
+    rightAns: "All of these"
   },
   {
-    question: "This is the third question",
-    answers: ["answer1", "answer2", "answer3", "answer4"],
-    rightAns: "answer1"
-  }
+    question: "The _______ method of an Array object adds and/or removes elements from an array.",
+    answers: ["Reverse", "Shift", "Splice", "Cut"],
+    rightAns: "Splice"
+  },
+  {
+    question: "Which of the following can be used to call a Javascript Code Snippet?",
+    answers: ["Function", "Event Listener", "Object", "Array"],
+    rightAns: "Function"
+  },
+  {
+    question: "What company developed Javascript?",
+    answers: ["Microsoft", "Meta", "Netscape", "IBM"],
+    rightAns: "Netscape"
+  },
+
 ]
-// The init function is called when the page loads and if user clicks Play Again button on scores page. Not sure what to put in it to make home page load? 
-function init() {
-  //reset global variables
-  //how to hide content for easier unhiding?  
+// The homeReload function is called when user clicks Play Again button on scores page.
+function homeReload() {
   location.reload();
   }
 
@@ -44,47 +55,56 @@ function startTimer() {
     timer = setInterval(function() {
       timerCount--;
       timerEl.textContent = timerCount;
-      if (timerCount === 0) {
+      if (timerCount <= 0) {
+      answerList.style.display = "none";
        gameOver(); 
       }
-      else if (timerCount <= 0) {
-        timerEl.textContent = " ";
-        clearInterval(startTimer);
-      }
     }, 1000);
-  };
+};
 
-//render QA removes intro text and presents first question and set of answers to user. How to make answers appear and make them clickable buttons so for loop can continue through all questions? 
+function removeTimer(){
+    timerEl.style.display= "none";
+        clearInterval(startTimer);
+};
+
+
+//render QA removes intro text and presents question and set of answers to user based on which quiz question they are on.
 function renderQA() {
     //removes content from original page load
     content.innerHTML ="";
       // defines variables for question and answer  
       var questionText = quiz[quizIndex].question;
       var answersText = quiz[quizIndex].answers;
-      //adds question to page
+      //adds question text to page
       content.textContent = questionText;
-      //for loop to list item to populate with answer options from quiz array.
+      content.classList.add("question-style");
+      //for loop to create buttons in list populated by answer options from quiz array
       for (var i = 0; i < answersText.length; i++) {
         var answerListItem =  document.createElement("button");
         answerListItem.textContent = answersText[i];
+        answerListItem.classList.add("answer-style");
+        //makes answer buttons responsive to clicks and run checkAnswer function
         answerListItem.addEventListener("click", (checkAnswer));
         answerList.appendChild(answerListItem);
       };
 };
 
-//checkAnswer function will review user selection to see if it's the right or wrong answer.
+//checkAnswer function will review user selection to see if it's the right or wrong answer and respond accordingly
 function checkAnswer(event) {
   var answerListItem = event.target.textContent;
   if(answerListItem != quiz[quizIndex].rightAns) {
     timerCount = timerCount - lessTime;
     result.textContent = "Wrong!";
-    currentScore = currentScore - 25;
-  } else if(answerListItem === quiz[quizIndex].rightAns) {
-    result.textContent = "Correct!";
+    console.log("wrong");
+    currentScore = currentScore;
+  } else if(answerListItem == quiz[quizIndex].rightAns) {
+    currentScore = currentScore + 25;
+    result.textContent = "Correct!"
+    console.log("correct");
   } else {
     return;
   }
-
+  //kicks off next question or gameOver function if all questions have been asked
   answerList.innerHTML = "";
   quizIndex++;
 
@@ -92,12 +112,38 @@ function checkAnswer(event) {
     renderQA();
   }
   else if(quizIndex >= quiz.length) {
+    removeTimer();
+    result.textContent = ""
     gameOver();
   }
 };
 
+// gameOver function is called when all answers have been collected or when timer reaches 0. It loads a form submission page to enter intials for high scores
+function gameOver() {
+  removeTimer();
+  //creating variables for all new elements to appear on game over screen
+  var gameOverEl = document.createElement("h2");
+  var scoreTextEl = document.createElement("p");
+  var nameFormContainer = document.createElement("form");
+  var nameForm = document.createElement("label");
+  var nameInput = document.createElement("input");
+  var submit = document.createElement("button");
+  //adding content to elements and appending them.
+  gameOverEl.textContent = "Game Over!"
+  content.appendChild(gameOverEl);
+  questionContent.appendChild(scoreTextEl);
+  nameForm.textContent = "Enter your initials to be added to high scores";
+  submit.textContent = "Submit";
+  nameFormContainer.append(nameForm, nameInput, submit);
+  content.innerHTML = "";
+  content.appendChild(nameFormContainer);
+ 
+  submit.addEventListener("click", loadScores);
+};
+
 //loadScores will update page to show the initials and scores of every round played since page was first loaded
-function loadScores() {
+function loadScores(event) {
+  event.preventDefault();
   //removes content from original page load
   content.innerHTML ="";
   //creates elements for title, list and buttons
@@ -107,58 +153,35 @@ function loadScores() {
   scoresTitle.textContent = "High Scores";
   content.appendChild(scoresTitle);
   var scoreUl = document.createElement("ul");
-  //not sure how to make the input from the form in gameOver function populate the list items here and add the currentScore variable next to it
-  var scoreListItems = document.createElement("li");
-  scoreUl.appendChild(scoreListItems);
+  var scoreEntry = document.createElement("li");
+
+  var initials = localStorage.getItem("initials");
+  scoreEntry.textContent = initials + currentScore;
+  
   playAgain.textContent = "Play Again?";
   clear.textContent = "Clear Scores";
   content.appendChild(playAgain);
   content.appendChild(clear);
 
   //event listener for when user clicks Play Again button
-  playAgain.addEventListener("click", init);
+  playAgain.addEventListener("click", homeReload);
    //event listener for when user clicks Clear Scores button
   clear.addEventListener("click", function() {
     scoreUl.innerHTML = "";
   })
-
 };
+
 
 // startGame function initiates timercountdown and renderQA1 functions; used in startButton event listener
 function startGame() {
-  timerCount = 6;
+  timerCount = 60;
   startTimer()
   renderQA()
 };
 
-// gameOver function is called when all answers have been collected and when timer reaches 0. It loads a form submission page to enter intials for high scores
-function gameOver() {
-  //creating variables for all new elements to appear on game over screen
-  var gameOverEl = document.createElement("h2");
-  var scoreTextEl = document.createElement("p");
-  var nameFormContainer = document.createElement("form");
-  var nameForm = document.createElement("label");
-  var nameInput = document.createElement("input");
-  var submit = document.createElement("button");
-  //adding content to elements and appending them. They are replacing each other instead of adding onto end. Need to fix. 
-  gameOverEl.textContent = "Game Over!"
-  content.appendChild(gameOverEl);
-  scoreTextEl.textContent = "Your score is " + currentScore;
-  content.appendChild(scoreTextEl);
-  nameForm.textContent = "Enter your initials to be added to high scores";
-  submit.textContent = "Submit";
-  nameFormContainer.append(nameForm, nameInput, submit);
-  content.innerHTML = "";
-  content.appendChild(nameFormContainer);
-  submit.addEventListener("click", loadScores);
-  
-  };
 
 //an event listener to start the game once user clicks start//
 startButton.addEventListener("click", startGame);
 
-// //an event listener for when an answer is selected//
-// answerList.addEventListener("click", checkAnswer);
-
-//an event listener for when user clicks on view scores element//
+//an event listener for when user clicks on view scores element/
 scores.addEventListener("click", loadScores);
