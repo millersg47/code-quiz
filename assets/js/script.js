@@ -64,7 +64,7 @@ function startTimer() {
 
 function removeTimer(){
     timerEl.style.display= "none";
-        clearInterval(startTimer);
+        clearInterval(timer);
 };
 
 
@@ -130,13 +130,14 @@ function gameOver() {
   var submit = document.createElement("button");
   //adding content to elements and appending them.
   gameOverEl.textContent = "Game Over!"
+  scoreTextEl.textContent = "Your score is " + currentScore;
   content.appendChild(gameOverEl);
-  questionContent.appendChild(scoreTextEl);
-  nameForm.textContent = "Enter your initials to be added to high scores";
+  nameForm.textContent = "Enter your initials to be added to high scores    ";
   submit.textContent = "Submit";
   nameFormContainer.append(nameForm, nameInput, submit);
   content.innerHTML = "";
-  content.appendChild(nameFormContainer);
+  content.append(scoreTextEl, nameFormContainer);
+  localStorage.setItem("nameInput", nameInput);
  
   submit.addEventListener("click", loadScores);
 };
@@ -146,6 +147,7 @@ function loadScores(event) {
   event.preventDefault();
   //removes content from original page load
   content.innerHTML ="";
+  questionContent.innerHTML = "";
   //creates elements for title, list and buttons
   var scoresTitle = document.createElement("h1");
   var playAgain = document.createElement("button");
@@ -155,27 +157,28 @@ function loadScores(event) {
   var scoreUl = document.createElement("ul");
   var scoreEntry = document.createElement("li");
 
-  var initials = localStorage.getItem("initials");
+  var initials = JSON.stringify(localStorage.getItem("nameInput"));
   scoreEntry.textContent = initials + currentScore;
+  content.appendChild(scoreEntry);
   
   playAgain.textContent = "Play Again?";
   clear.textContent = "Clear Scores";
   content.appendChild(playAgain);
   content.appendChild(clear);
 
-  //event listener for when user clicks Play Again button
-  playAgain.addEventListener("click", homeReload);
+   //event listener for when user clicks Play Again button
+   playAgain.addEventListener("click", homeReload);
    //event listener for when user clicks Clear Scores button
   clear.addEventListener("click", function() {
     scoreUl.innerHTML = "";
-  })
+  });
 };
 
 
 // startGame function initiates timercountdown and renderQA1 functions; used in startButton event listener
 function startGame() {
   timerCount = 60;
-  startTimer()
+  startTimer();
   renderQA()
 };
 
